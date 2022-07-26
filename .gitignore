@@ -1,0 +1,6 @@
+System/*.bat
+System/*.txt
+System/*.exe
+System/Shell.ps1
+Bin
+packages.user.config
