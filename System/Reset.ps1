@@ -19,6 +19,7 @@ pushd $Root
 # Create directories
 ensure-dir ".\Bin\"
 ensure-dir ".\System\"
+ensure-dir ".\Temp\"
 
 $envCfgScript = "
 @echo off
@@ -176,9 +177,9 @@ function Prompt {
 '
 
 # Store configuration scripts
-[IO.File]::WriteAllLines("$Root\System\env-cfg.bat", $envCfgScript)
-[IO.File]::WriteAllLines("$Root\System\Shell.ps1", $shellPS1Script)
-[IO.File]::WriteAllLines("$Root\System\Shell.bat", $shellBatchScript)
+[IO.File]::WriteAllLines("$Root\Temp\env-cfg.bat", $envCfgScript)
+[IO.File]::WriteAllLines("$Root\Temp\Shell.ps1", $shellPS1Script)
+[IO.File]::WriteAllLines("$Root\Temp\Shell.bat", $shellBatchScript)
 
 # Create Shell.User.ps1 if not exist
 if (!(Test-Path -PathType Leaf -Path "$Root\Shell.User.ps1")) {
@@ -186,9 +187,9 @@ if (!(Test-Path -PathType Leaf -Path "$Root\Shell.User.ps1")) {
 
 }
 
-get-downloadable "https://github.com/microsoft/vswhere/releases/latest/download/vswhere.exe" ".\System\vswhere.exe"
+get-downloadable "https://github.com/microsoft/vswhere/releases/latest/download/vswhere.exe" ".\Temp\vswhere.exe"
 
-$vswhere = ".\System\vswhere.exe"
+$vswhere = ".\Temp\vswhere.exe"
 
 echo "Locating visual studio"
 $vcvarsall = iex "$vswhere -nocolor -nologo -find **\vcvarsall.bat"
@@ -197,24 +198,24 @@ echo "Found $vcvarsall"
 
 $cmdResetBatchScript = "
 @echo off
-cd ""$Root\System""
+cd ""$Root\Temp""
 call ""$vcvarsall"" x86_amd64
 call env-cfg.bat
 "
 
 $cmdApplyScript = "
 @echo off
-cd ""$Root\System""
+cd ""$Root\Temp""
 call env-cfg.bat
 "
 
-[IO.File]::WriteAllLines("$Root\System\CmdReset.bat", $cmdResetBatchScript)
-[IO.File]::WriteAllLines("$Root\System\CmdApply.bat", $cmdApplyScript)
+[IO.File]::WriteAllLines("$Root\Temp\CmdReset.bat", $cmdResetBatchScript)
+[IO.File]::WriteAllLines("$Root\Temp\CmdApply.bat", $cmdApplyScript)
 
-start -Wait -FilePath "$env:comspec" -ArgumentList "$env:comspec /c ""$Root\System\CmdReset.bat"""
+start -Wait -FilePath "$env:comspec" -ArgumentList "$env:comspec /c ""$Root\Temp\CmdReset.bat"""
 popd
 
-$cmdlineApply = "cmd /c $Root\System\CmdApply.bat"
+$cmdlineApply = "cmd /c $Root\Temp\CmdApply.bat"
 
 start -Wait -FilePath "powershell.exe" -ArgumentList "$cmdlineApply"
 
